@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+#include <map>
+using namespace std;
+
+int main(){
+	int n = 0;
+	int p = 0;
+
+	string input;
+	vector<long int> list;
+
+	while(cin >> input){
+		long int value = atol(input.c_str());
+
+		if(list.size() == 0){
+			list.push_back(value);
+		}else{
+			vector<long int>::iterator it = lower_bound(list.begin(), list.end(), value);
+			list.insert(it, value);
+		}
+
+		long int mid = 0;
+		int pos = list.size()/2;
+		// there is a middle
+		if(list.size() % 2 == 1){
+			mid = list[pos];
+		}else{// floor of average
+			mid = (list[pos] + list[pos-1])/2;
+		}
+
+		printf("%ld\n", mid);
+	}
+}
