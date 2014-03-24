@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+int main(){
+	string command;
+	int qnum[1001];
+	int regSize = 0;
+	int period[1001];
+	int count = 0;
+	int q, p;
+	priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > A;
+	while(cin >> command){ // read line to get all registered events
+		if(command.compare("#") == 0){ // if the line is a separation
+			cin>>command; // read next line and get the number of events to be printed
+			count = atoi(command.c_str()); // use count as the number of events to be printed
+			break;
+		}else{ // if it is not a separation
+			cin >> command; // read query number
+			q = atoi(command.c_str());
+			cin >> command; // read query period
+			p = atoi(command.c_str());
+			// save the query number and period
+			qnum[regSize] = q;
+			period[regSize] = p;
+			regSize++; // increment the number of queries
+		}
+	}
+	// as period is in monotonical ascending order, the maximum period we can achieve
+	// is the number of queries by the minimal time period
+	// TODO: add image example
+	int max = count * period[0];
+	// for every query registered
+	for(int index = 0; index < regSize; index++){
+		int mult = 1; // start multiplicity
+		// while the multiplicity of this query period is smaller than max period
+		// TODO: change this for to a while loop
+		for(int k = 1; mult * period[index] <= max; k++){
+			// add this query by pair<period, query number>
+			A.push(pair<int, int>(mult * period[index], qnum[index]));
+			// increment multiplicity
+			mult++;
+			// remember that when ordering pair<A, B1> and pair<A, B2> when first element
+			// has the same value the pair<A,B1> will be smaller than pair<A,B2> only if
+			// B1 < B2, this makes the statement that “if more than 1 query happens at the
+			// same time, the order should be taken from query number”
+		}
+	}
+	pair<int, int> tempPair;
+	pair<int, int> temp2Pair;
+	// for the number of results needed
+	while(count){
+		// take the top of the priority queue
+		printf("%d\n", A.top().second);
+		A.pop();
+		count--;
+		
+	}
+	return 0;
+}
