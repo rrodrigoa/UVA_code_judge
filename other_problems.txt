@@ -1,0 +1,3651 @@
+924- spreading the news
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cmath>
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main(){
+	vector<vector<int> > adj;
+
+	int e;
+	cin >> e;
+
+	adj.assign(e, vector<int>());
+
+	for (int i = 0; i < e; i++){
+		int c;
+		cin >> c;
+
+		while (c--){
+			int v;
+			cin >> v;
+			adj[i].push_back(v);
+		}
+	}
+
+	int t;
+	cin >> t;
+
+	while (t--){
+		int s;
+		cin >> s;
+		if (adj[s].size() == 0){
+			printf("0\n");
+		}
+		else{
+			int day = 1;
+			int maxDay = 1;
+			int max = 1;
+
+			queue<int> currentBoom;
+			queue<int> nextBoom;
+			map<int, bool> visited;
+			visited[s] = true;
+
+			currentBoom.push(s);
+			while (currentBoom.size() != 0){
+
+				while (currentBoom.size() != 0){
+					int top = currentBoom.front();
+					currentBoom.pop();
+					for (int i = 0; i < adj[top].size(); i++){
+						int child = adj[top][i];
+						if (visited[child] == false){
+							nextBoom.push(child);
+							visited[child] = true;
+						}
+					}
+				}
+
+				if (nextBoom.size() > max){
+					maxDay = day;
+					max = nextBoom.size();
+				}
+
+				currentBoom = nextBoom;
+				nextBoom = queue<int>();
+				day++;
+			}
+
+			printf("%d %d\n", max, maxDay);
+		}
+	}
+
+	return 0;
+}
+
+836 - Largest Submatrix
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main(){
+	string input;
+
+	std::getline(std::cin, input);
+	int cases = atoi(input.c_str());
+	bool begin = false;
+
+	while (cases--){
+		if (begin){
+			printf("\n");
+		}
+		vector<vector<int>> matrix;
+		while (std::getline(std::cin, input)){
+			if (input.size() >= 1){
+				vector<int> line;
+				for (int index = 0; index < input.size(); index++){
+					if (input[index] == '0'){
+						line.push_back(0);
+					}
+					else{
+						line.push_back(1);
+					}
+				}
+				matrix.push_back(line);
+			}
+			else if (begin == false){
+				begin = true;
+			}
+			else{
+				break;
+			}
+		}
+
+		// compute
+		int col = matrix[0].size();
+		int line = matrix.size();
+
+		for (int i = 0; i < col; i++){
+			for (int j = 0; j < line; j++){
+				if (i > 0){
+					matrix[i][j] += matrix[i - 1][j];
+				}
+				if (j > 0){
+					matrix[i][j] += matrix[i][j - 1];
+				}
+				if (i > 0 && j > 0){
+					matrix[i][j] -= matrix[i - 1][j - 1];
+				}
+			}
+		}
+
+		int maxSum = 0;
+		for (int i = 0; i < col; i++){
+			for (int j = 0; j < line; j++){
+				for (int k = i; k < col; k++){
+					for (int l = j; l < line; l++){
+						int subRect = matrix[k][l];
+						if (i > 0){
+							subRect -= matrix[i - 1][l];
+						}
+						if (j > 0){
+							subRect -= matrix[k][j - 1];
+						}
+						if (i > 0 && j > 0){
+							subRect += matrix[i - 1][j - 1];
+						}
+						if (subRect == (k - i + 1) * (l - j + 1)){
+							maxSum = max(maxSum, subRect);
+						}
+					}
+				}
+			}
+		}
+		printf("%d\n", maxSum);
+	}
+	return 0;
+}
+
+
+11790 - Murcia's Skyline
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <iostream>
+using namespace std;
+
+int main(){
+
+	int cases = 0;
+	cin >> cases;
+	int k = 1;
+	while (cases--){
+		vector<int> h;
+		vector<int> w;
+
+		int b = 0;
+		int i = 0;
+		int value;
+		cin >> b;
+		while (i++ < b){
+			cin >> value;
+			h.push_back(value);
+		}
+		i = 0;
+		while (i++ < b){
+			cin >> value;
+			if (value > 0){
+				w.push_back(value);
+			}
+			else{
+				w.push_back(0);
+			}
+		}
+
+		vector<int> lis;
+		lis.push_back(w[0]);
+		for (int i = 1; i < h.size(); i++){
+			int lisM = w[i];
+			int pos = -1;
+			for (int j = 0; j < i; j++){
+				if (h[j] < h[i]){
+					if (lis[j] + w[i] > lisM){
+						pos = j;
+						lisM = lis[j] + w[i];
+					}
+				}
+			}
+			if (pos != -1){
+				lis.push_back(lis[pos]+ w[i]);
+			}
+			else{
+				lis.push_back(w[i]);
+			}
+		}
+		
+		vector<int> lds;
+		lds.push_back(w[0]);
+		for (int i = 1; i < h.size(); i++){
+			int ldsM = w[i];
+			int pos = -1;
+			for (int j = 0; j < i; j++){
+				if (h[j] > h[i]){
+					if (lds[j] + w[i] > ldsM){
+						pos = j;
+						ldsM = lds[j] + w[i];
+					}
+				}
+			}
+			if (pos != -1){
+				lds.push_back(lds[pos] + w[i]);
+			}
+			else{
+				lds.push_back(w[i]);
+			}
+		}
+
+		int maxLis = lis[0];
+		for (int i = 1; i < lis.size(); i++){
+			maxLis = max(lis[i], maxLis);
+		}
+
+		int maxLds = lds[0];
+		for (int i = 1; i < lds.size(); i++){
+			maxLds = max(lds[i], maxLds);
+		}
+
+		if (maxLis >= maxLds){
+			printf("Case %d. Increasing (%d). Decreasing (%d).\n", k, maxLis, maxLds);
+		}
+		else{
+			printf("Case %d. Decreasing (%d). Increasing (%d).\n", k, maxLds, maxLis);
+		}
+		k++;
+	}
+	return 0;
+}
+
+10474 - Where is the Marble?
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <iostream>
+using namespace std;
+
+int main(){
+
+	int N, Q;
+	int cases = 1;
+	cin >> N;
+	cin >> Q;
+	while (N != 0 || Q != 0){
+		vector<int> marbles;
+		while (N--){
+			int value;
+			cin >> value;
+			marbles.push_back(value);
+		}
+
+		sort(marbles.begin(), marbles.end());
+		printf("CASE# %d:\n", cases++);
+		while (Q--){
+			int query;
+			cin >> query;
+			vector<int>::iterator it = lower_bound(marbles.begin(), marbles.end(), query);
+			if (it == marbles.end() || *it != query){
+				printf("%d not found\n", query);
+			}
+			else{
+				printf("%d found at %d\n", query, it - marbles.begin()+1);
+			}
+		}
+		cin >> N;
+		cin >> Q;
+	}
+	return 0;
+}
+
+
+679 - Dropping balls _TLE
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string.h>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+#include <list>
+#include <stack>
+#include <bitset>
+#include <math.h>
+using namespace std;
+
+int main() {
+	int cases;
+
+	cin >> cases;
+	while(cases--){
+		int H, B;
+		cin >> H;
+		cin >> B;
+
+		int i = 0;
+		int numNodes = pow(2, H)-1;
+		bitset<1048580> bit;
+		
+		while(B--){
+			i = 0;
+			while(2*i+1 < numNodes){
+				bit[i] = !bit[i];
+				if(bit[i] == true){
+					i = 2*i+1;
+				}else{
+					i = 2*i+2;
+				}
+			}
+		}
+
+		printf("%d\n", i+1);
+	}
+}
+
+
+760 - DNA Sequencing - TLE
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+	bool fromA;
+	bool fromB;
+	map<char, struct Node*> *children;
+};
+
+int main(){
+	string A;
+	string B;
+	bool continueCase = true;
+	bool firstPrint = true;
+	while (continueCase){
+		std::getline(std::cin, A);
+		std::getline(std::cin, B);
+
+		if (A.size() == 0 && B.size() == 0){
+			continueCase = false;
+			continue;
+		}
+
+		struct Node* root = (struct Node*)malloc(sizeof(struct Node));
+		root->fromA = true;
+		root->fromB = true;
+		root->children = new map<char, struct Node*>();
+		struct Node* temp = root;
+		int i = 0;
+		while (i < A.size()){
+			int j = i;
+			temp = root;
+			while (j < A.size()){
+				if (temp->children->find(A[j]) == temp->children->end()){
+					struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+					newNode->fromA = true;
+					newNode->fromB = false;
+					newNode->children = new map<char, struct Node*>();
+					temp->children->insert(pair<char,struct Node*>(A[j], newNode));
+				}
+				temp = temp->children->at(A[j]);
+				j++;
+			}
+			i++;
+		}
+		temp = root;
+		i = 0;
+		priority_queue<pair<int, string> > pq;
+
+		while (i < B.size()){
+			int j = i;
+			temp = root;
+			string newString = "";
+			while (j < B.size()){
+				if (temp->children->find(B[j]) != temp->children->end()){
+					temp->fromB = true;
+					temp = temp->children->at(B[j]);
+					newString += B[j];
+					j++;
+				}
+				else{
+					break;
+				}
+			}
+			pq.push(pair<int, string>(newString.size(), newString));
+			i++;
+		}
+
+		if (firstPrint){
+			firstPrint = false;
+		}
+		else{
+			printf("\n");
+		}
+
+		if (pq.size() == 0){
+			printf("No common sequence.\n");
+		}
+		else{
+			vector<string> result;
+
+			pair<int, string> best = pq.top();
+			pq.pop();
+			int lastBestSize = best.first;
+			while (lastBestSize == best.first){
+				result.push_back(best.second);
+				if (pq.size() != 0){
+					best = pq.top();
+					pq.pop();
+				}
+				else{
+					break;
+				}
+			}
+
+			sort(result.begin(), result.end());
+			vector<string>::iterator it = result.begin();
+			while (it != result.end()){
+				printf("%s\n", (*it).c_str());
+				it++;
+			}
+		}
+	}
+	return 0;
+}
+
+
+11475 - Extend to Palindrome
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+
+
+int main(){
+	string input;
+	while (cin >> input){
+		int b[200002];
+		int i = 0;
+		int j = -1;
+		b[0] = -1;
+
+		string pattern = input;
+		std::reverse(pattern.begin(), pattern.end());
+		if (input.compare(pattern) != 0){
+			pattern = pattern + input;
+
+			int m = pattern.size();
+
+			while (i < m){
+				while (j >= 0 && pattern[i] != pattern[j]){
+					j = b[j];
+				}
+				i++;
+				j++;
+				b[i] = j;
+			}
+
+			int cut = b[i];
+			string reverse = input.substr(0, input.size() - cut);
+			std::reverse(reverse.begin(), reverse.end());
+			string result = input + reverse;
+			printf("%s\n", result.c_str());
+		}
+		else{
+			printf("%s\n", input.c_str());
+		}
+	}
+	return 0;
+}
+
+
+
+10487 - Closest Sums
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string.h>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+#include <list>
+#include <stack>
+using namespace std;
+
+int main() {
+	int n;
+	int m;
+
+	int input[1001];
+	vector<long int> mult;
+	priority_queue<pair<long int, vector<long int>::iterator>, vector<pair<long int, vector<long int>::iterator> >, std::greater<pair<long int, vector<long int>::iterator> > > pp;
+
+	cin >> n;
+	int k = 0;
+	int caseN = 1;
+	while(n != 0){
+		while(n != 0){
+			int value;
+			cin >> value;
+			input[k++] = value;
+			n--;
+		}
+
+		for(int i = 0; i < k; i++){
+			for(int j = i; j < k; j++){
+				if(i != j){
+					mult.push_back(input[i]+input[j]);
+				}
+			}
+		}
+
+		sort(mult.begin(), mult.end());
+		printf("Case %d:\n", caseN++);
+		cin >> m;
+		while(m--){
+			int value;
+			cin >> value;
+			vector<long int>::iterator lower = lower_bound(mult.begin(), mult.end(), value);
+			vector<long int>::iterator upper = upper_bound(mult.begin(), mult.end(), value);
+
+			if(lower == mult.end()){
+				lower = mult.begin();
+			}
+			pp.push(pair<long int, vector<long int>::iterator>(abs(value-*lower), lower));
+
+			if(upper == mult.end()){
+				upper = mult.end()-1;
+			}
+			pp.push(pair<long int, vector<long int>::iterator>(abs(value-*upper), upper));
+
+			if(lower != mult.end() && lower+1 != mult.end()){
+				pp.push(pair<long int, vector<long int>::iterator>(abs(value-*(lower+1)), lower+1));
+			}
+			if(upper != mult.end() && upper+1 != mult.end()){
+				pp.push(pair<long int, vector<long int>::iterator>(abs(value-*(upper+1)), upper+1));
+			}
+			if(lower != mult.end() && lower != mult.begin()){
+				pp.push(pair<long int, vector<long int>::iterator>(abs(value-*(lower-1)), lower-1));
+			}
+			if(upper != mult.end() && upper != mult.begin()){
+				pp.push(pair<long int, vector<long int>::iterator>(abs(value-*(upper-1)), upper-1));
+			}
+			pair<long int, vector<long int>::iterator> p = pp.top();
+
+			printf("Closest sum to %d is %d.\n", value, *p.second);
+			while(pp.empty() == false){
+				pp.pop();
+			}
+		}
+		mult.clear();
+		k = 0;
+		cin >> n;
+	}
+}
+
+SRM 196 DIV 250points
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string.h>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+#include <list>
+#include <stack>
+using namespace std;
+
+class ClapLight
+{
+public:
+	int threshold(vector <int> background){
+		vector<int> sorted = vector<int>(background.begin(), background.end());
+		sort(sorted.begin(), sorted.end());
+		int lastB = sorted[sorted.size()/2] +1;
+		bool changed = true;
+		while(changed){
+			changed = false;
+			for(int i = 0; i < background.size() -4 && changed == false; i++){
+				if(background[i] < lastB && background[i+1] >= lastB && background[i+2] >= lastB && background[i+3] < lastB){
+					changed = true;
+					lastB++;
+				}
+			}
+		}
+		return lastB;
+	}
+};
+
+
+105 - The Skyline Problem
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string.h>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+#include <list>
+#include <stack>
+using namespace std;
+
+int main() {
+	int a,b,c;
+	int map[10001];
+	int lastEnd = 1;
+	memset(&map, 0, 10001*sizeof(int));
+
+	while(cin>>a>>c>>b){
+		for(int i = a; i <b; i++){
+			if(c > map[i]){
+				map[i] = c;
+			}
+			if(b > lastEnd){
+				lastEnd = b;
+			}
+		}
+	}
+	int top = 0;
+	for(int i = 1; i <= lastEnd; i++){
+		if(top != map[i]){
+			printf("%d %d", i, map[i]);
+			if(i != lastEnd){
+				printf(" ");
+			}
+			top = map[i];
+		}
+		
+	}
+	printf("\n");
+}
+
+
+1203 - Argus
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+int main(){
+	string command;
+	int qnum[1001];
+	int regSize = 0;
+	int period[1001];
+	int count = 0;
+	int q, p;
+	priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > A;
+	while(cin >> command){ // read line to get all registered events
+		if(command.compare("#") == 0){ // if the line is a separation
+			cin>>command; // read next line and get the number of events to be printed
+			count = atoi(command.c_str()); // use count as the number of events to be printed
+			break;
+		}else{ // if it is not a separation
+			cin >> command; // read query number
+			q = atoi(command.c_str());
+			cin >> command; // read query period
+			p = atoi(command.c_str());
+			// save the query number and period
+			qnum[regSize] = q;
+			period[regSize] = p;
+			regSize++; // increment the number of queries
+		}
+	}
+	// as period is in monotonical ascending order, the maximum period we can achieve
+	// is the number of queries by the minimal time period
+	// TODO: add image example
+	int max = count * period[0];
+	// for every query registered
+	for(int index = 0; index < regSize; index++){
+		int mult = 1; // start multiplicity
+		// while the multiplicity of this query period is smaller than max period
+		// TODO: change this for to a while loop
+		for(int k = 1; mult * period[index] <= max; k++){
+			// add this query by pair<period, query number>
+			A.push(pair<int, int>(mult * period[index], qnum[index]));
+			// increment multiplicity
+			mult++;
+			// remember that when ordering pair<A, B1> and pair<A, B2> when first element
+			// has the same value the pair<A,B1> will be smaller than pair<A,B2> only if
+			// B1 < B2, this makes the statement that “if more than 1 query happens at the
+			// same time, the order should be taken from query number”
+		}
+	}
+	pair<int, int> tempPair;
+	pair<int, int> temp2Pair;
+	// for the number of results needed
+	while(count){
+		// take the top of the priority queue
+		printf("%d\n", A.top().second);
+		A.pop();
+		count--;
+		
+	}
+	return 0;
+}
+
+1203 - Argus
+STL priority_queue
+The idea of Argus is to print the N events that are registered on the second part of the algorithm, which marked by the char ‘#’.
+
+The algorithm is divided in 4 parts:
+First [] - The Algorithm reads the K registered events and saves number on qnum and time period on period, and increments the number of registered queries on regSize.
+Second [] - Second part consist of reading the char ‘#’ and reading next line, which will tell you how many events should be printed.
+Third [] - This part is responsible for creating a priority queue that will have all, up to max time period, queries.
+Forth [] - Lastly you just need to pop count elements from the priority queue, they will be in order of period, and if it happens to have many different queries within the same period they will also be in order of the second element in the pair<int,int>
+
+
+10954 - Add All
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+int main(){
+	string command;
+	priority_queue< long long, vector<long long>, greater<long long> > sumQ;
+	while(cin >> command){
+		if(command.compare("0") == 0){
+			break;
+		}else{
+			// read how many items there are to be added
+			int num = atoi(command.c_str());
+			// for every number to be added, push it to the sumQ priority queue
+			while(num){
+				cin >> command;
+				sumQ.push(atoi(command.c_str()));
+				num--;
+			}
+			long long sum = 0;
+			long long totalSum = 0;
+			// while there are items to be added
+			while(sumQ.size() != 1){
+				// take two numbers from priority queue
+				sum = 0;
+				sum = sumQ.top();
+				sumQ.pop();
+				// sum both numbers and push it back to the priority queue
+				sum += sumQ.top();
+				sumQ.pop();
+				sumQ.push(sum);
+				// add the sum to total sum
+				totalSum += sum;
+			}
+			// print long long of total sum
+			// remember that summing all items may overflow int size
+			printf("%lld\n", totalSum);
+			sumQ.pop();
+		}
+	}
+	return 0;
+}
+
+417 - Word Index
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	int size = 1;
+	map<string, int> table;
+	string word = "a";
+	for(int a = 0; a < 26; a++){
+		word[0] = 'a' + a;
+		table[word] = size++;
+	}
+	word = word.append("a");
+	for(int a = 0; a < 26; a++){
+		for(int b = a+1; b < 26; b++){
+			word[0] = 'a' + a;
+			word[1] = 'a' + b;
+			table[word] = size++;
+		}
+	}
+	word = word.append("a");
+	for(int a = 0; a < 26; a++){
+		for(int b = a+1; b < 26; b++){
+			for(int c = b+1; c < 26; c++){
+				word[0] = 'a' + a;
+				word[1] = 'a' + b;
+				word[2] = 'a' + c;
+				table[word] = size++;
+			}
+		}
+	}
+	word = word.append("a");
+	for(int a = 0; a < 26; a++){
+		for(int b = a+1; b < 26; b++){
+			for(int c = b+1; c < 26; c++){
+				for(int d = c+1; d < 26; d++){
+					word[0] = 'a' + a;
+					word[1] = 'a' + b;
+					word[2] = 'a' + c;
+					word[3] = 'a' + d;
+					table[word] = size++;
+				}
+			}
+		}
+	}
+	word = word.append("a");
+	for(int a = 0; a < 26; a++){
+		for(int b = a+1; b < 26; b++){
+			for(int c = b+1; c < 26; c++){
+				for(int d = c+1; d < 26; d++){
+					for(int e = d+1; e < 26; e++){
+						word[0] = 'a' + a;
+						word[1] = 'a' + b;
+						word[2] = 'a' + c;
+						word[3] = 'a' + d;
+						word[4] = 'a' + e;
+						table[word] = size++;
+					}
+				}
+			}
+		}
+	}
+	while(cin >> command){
+		if(table[command] != 0){
+			printf("%d\n", table[command]);
+		}else{
+			printf("0\n");
+		}
+	}
+	return 0;
+}
+
+11057 - Exact Sum
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	vector<int> num;
+	while(cin >> command){
+		int size = atoi(command.c_str());
+		int k = 0;
+		while(k != size){
+			cin >> command;
+			num.push_back(atoi(command.c_str()));
+			k++;
+		}
+		sort(num.begin(), num.end());
+		int start = 0;
+		int possibleStart = 0;
+		int end = size-1;
+		int possibleEnd = size-1;
+		cin >> command;
+		long long total = atoi(command.c_str());
+		long long sum = num[possibleStart] + num[possibleEnd];
+		while(possibleStart < possibleEnd -1){
+			if(sum > total){
+				possibleEnd--;
+			}else{
+				possibleStart++;
+			}
+			sum = num[possibleStart] + num[possibleEnd];
+			if(sum == total){
+				if((num[possibleEnd] - num[possibleStart]) < (num[end] - num[start])){
+					end = possibleEnd;
+					start = possibleStart;
+				}
+			}
+		}
+		printf("Peter should buy books whose prices are %d and %d.\n\n", num[start], num[end]);
+		while(num.size()){
+			num.pop_back();
+		}
+	}
+	return 0;
+}
+
+902 - Password Search
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	map<string, int> count;
+	int numOfStrings = 0;
+	while(cin >> command){
+		numOfStrings = atoi(command.c_str());
+		
+		cin >> command;
+		for(int index = 0; index < command.length() - (numOfStrings-1); index++){
+			string sub = command.substr(index, numOfStrings);
+			count[sub] += 1;
+		}
+		string topSub = "";
+		int topCount = 0;
+		map<string, int>::iterator it = count.begin();
+		while(it != count.end()){
+			if((*it).second > topCount){
+				topSub = (*it).first;
+				topCount = (*it).second;
+			}
+			it++;
+		}
+		printf("%s\n", topSub.c_str());
+		count.clear();
+	}
+	return 0;
+}
+
+406 - Prime cuts
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	vector<int> primeNums;
+	primeNums.push_back(1);
+	for(int index = 2; primeNums[primeNums.size()-1] < 1001; index ++){
+		vector<int>::iterator it = primeNums.begin();
+		bool prime = true;
+		while(it != primeNums.end()){
+			if(*it != 1){
+				if(index % *it == 0){
+					prime = false;
+					break;
+				}
+			}
+			it++;
+		}
+		if(prime){
+			primeNums.push_back(index);
+		}
+	}
+	while(cin >> command){
+		int N = atoi(command.c_str());
+		cin >> command;
+		int C = atoi(command.c_str());
+		int CPrime = C;
+		vector<int> primesToN;
+		vector<int>::iterator it = primeNums.begin();
+		while(*it <= N){
+			primesToN.push_back(*it);
+			it++;
+		}
+		int start, end;
+		if(primesToN.size() % 2 == 0){
+			C = C*2;
+			start = primesToN.size()/2;
+			end = start + (C/2 -1);
+			start = (start -1 ) - (C/2 -1);
+		}else{
+			C = (C*2) -1;
+			start = primesToN.size()/2;
+			end = start + C/2;
+			start = start - C/2;
+		}
+		if(start > end){
+			start = 0;
+			end = 0;
+		}
+		if(start < 0){
+			start = 0;
+		}
+		if(end >= primesToN.size()){
+			end = primesToN.size()-1;
+		}
+		printf("%d %d:", N, CPrime);
+		while(start <= end){
+			printf(" %d", primesToN[start++]);
+		}
+		printf("\n\n");
+	}
+	return 0;
+}
+
+10720 - Graph Construction
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+　
+	while(cin >> command){
+		int count = atoi(command.c_str());
+		if(count == 0){
+			break;
+		}
+		vector<int> distribution;
+		for(int index = count; index --;){
+			cin >> command;
+			distribution.push_back(atoi(command.c_str()));
+		}
+		sort(distribution.begin(), distribution.end());
+		reverse(distribution.begin(), distribution.end());
+		bool possible = true;
+		while(distribution[distribution.size()-1] >= 0 && distribution[0] > 0){
+			int delta = distribution[0];
+			int k = delta;
+			distribution.erase(distribution.begin());
+			if(delta > distribution.size()){
+				possible = false;
+				break;
+			}
+			for(int index = 0; index < k; index++){
+				distribution[index] -= 1;
+			}
+			sort(distribution.begin(), distribution.end());
+			reverse(distribution.begin(), distribution.end());
+		}
+		sort(distribution.begin(), distribution.end());
+		if(possible == false || distribution[0] < 0){
+			printf("Not possible\n");
+		}else{
+			printf("Possible\n");
+		}
+	}
+	return 0;
+}
+info - http://www.maths.unp.ac.za/coursework/Math236/2012/Lecture%20Slides/Math236%20Lecture%2031.pdf
+
+11991 - Easy Problem from 
+
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	map<int, vector<int> > preCount;
+	while(cin >> command){
+		int nums = atoi(command.c_str());
+		cin >> command;
+		int questions = atoi(command.c_str());
+		for(int index = 0; index < nums; index++){
+			cin >> command;
+			int value = atoi(command.c_str());
+			preCount[value].push_back(index+1);
+		}
+		for(int index = 0; index < questions; index++){
+			cin >> command;
+			int numIndex = atoi(command.c_str());
+			cin >> command;
+			int numValue = atoi(command.c_str());
+			if(numIndex > preCount[numValue].size() || (numIndex-1 < 0)){
+				printf("0\n");
+			}else{
+				printf("%d\n", preCount[numValue][numIndex-1]);
+			}
+		}
+	}
+	return 0;
+}
+
+793 - Network Connections - TLE - Linux test missing
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	
+	getline(cin, command);
+	int cases = atoi(command.c_str());
+	while(cases--){
+		int computers;
+		cin >> computers;
+		bool readMore = true;
+		int* set = (int*)malloc(sizeof(int)*(computers+1));
+		
+		for(int index = 0; index <= computers; index++){
+			set[index] = 0;
+		}
+		int right = 0;
+		int wrong = 0;
+		while(readMore){
+			char cValue;
+			int A;
+			int B;
+			bool SecondLineBreak = false;
+			do{
+				cValue = getchar();
+				if(SecondLineBreak && cValue == 10){
+					readMore = false;
+					break;
+				}
+				if(cValue == 10){
+					SecondLineBreak = true;
+				}
+			}while(cValue == 10 || cValue == 13);
+			if(cValue == 26 || cValue == -1 || readMore == false){
+				readMore = false;
+			}else{
+				SecondLineBreak;
+				cin >> A;
+				cin >> B;
+				if(cValue == 'c'){
+					if(set[A] == 0 && set[B] == 0){
+						set[A] = A;
+						set[B] = A;
+					}else if(set[A] == 0){
+						while(set[A] != A){
+							A = set[A];
+						}
+						set[A] = B;
+					}else{
+						while(set[B] != B){
+							B = set[B];
+						}
+						set[B] = A;
+					}
+				}else if(cValue == 'q'){
+					vector<int> elemList;
+					int lastNum = A;
+					while(set[A] != A){
+						elemList.push_back(A);
+						A = set[A];
+						lastNum = A;
+					}
+					vector<int>::iterator it = elemList.begin();
+					for(int index = 0; index < elemList.size(); index++){
+						set[(*it)] = lastNum;
+						it++;
+					}
+					elemList.clear();
+					lastNum = B;
+					while(set[B] != B){
+						elemList.push_back(B);
+						B = set[B];
+						lastNum = B;
+					}
+					it = elemList.begin();
+					for(int index = 0; index < elemList.size(); index++){
+						set[(*it)] = lastNum;
+						it++;
+					}
+					if(A == B){
+						if(A == 0){
+							wrong++;
+						}else{
+							right++;
+						}
+					}else{
+						wrong++;
+					}
+				}
+			}
+		}
+		printf("%d,%d\n", right, wrong);
+	}
+	return 0;
+}
+
+10507 - Waking up brain
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <map>
+using namespace std;
+int main(){
+	string command;
+	while(cin >> command){
+		map< char, vector<char> > connections;
+		map< char, bool > awake;
+		int awakeCount = atoi(command.c_str());
+		cin >> command;
+		int connectionCount = atoi(command.c_str());
+		cin >> command;
+		for(int index = 0; index < command.size(); index++){
+			awake[command[index]] = true;
+		}
+		while(connectionCount--){
+			cin >> command;
+			connections[command[0]].push_back(command[1]);
+			connections[command[1]].push_back(command[0]);
+		}
+		bool changed = true;
+		int years = 0;
+		while(changed){
+			changed = false;
+			map<char, vector<char> >::iterator it = connections.begin();
+			map<char, bool> awakeTemp = awake;
+			while(it != connections.end()){
+				if(awake[(*it).first] == false){
+					int awakeCount = 0;
+					vector<char>::iterator vecIt = (*it).second.begin();							awakeCount++;
+						}
+						vecIt++;
+					}
+					if(awakeCount == 3){
+						awakeTemp[(*it).first] = true;
+						changed = true;
+					}
+				}
+				it++;
+			}
+			if(changed){
+				awake = awakeTemp;
+				years++;
+			}
+		}
+		map<char, bool>::iterator it = awake.begin();
+		bool allAwake = true;
+		while(it != awake.end()){
+			if((*it).second == false){
+				allAwake = false;
+			}else{
+				awakeCount--;
+			}
+			it++;
+		}
+		if(allAwake && awakeCount == 0){
+			printf("WAKE UP IN, %d, YEARS\n", years);
+		}else{
+			printf("THIS BRAIN NEVER WAKES UP\n");
+		}
+					while(vecIt != (*it).second.end() && awakeCount < 3){
+						if(awake[(*vecIt)] == true){
+
+	}
+	return 0;
+}
+
+10341 - Solve it - WA precissao esta acima do aceitavel
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+using namespace std;
+int main(){
+	string command;
+	while(cin >> command){
+		int p, q, r, s, t, u;
+		p = atoi(command.c_str());
+		cin >> command;
+		q = atoi(command.c_str());
+		cin >> command;
+		r = atoi(command.c_str());
+		cin >> command;
+		s = atoi(command.c_str());
+		cin >> command;
+		t = atoi(command.c_str());
+		cin >> command;
+		u = atoi(command.c_str());
+		double startX = 0;
+		double endX = 1;
+		double X = (endX - startX)/2 + startX;
+		double result = p*exp(-X) + q*sin(X) + r*cos(X) + s*tan(X) + t*X*X + u;
+		
+		while(abs((double)result) > 0.000001 && endX - startX > 0.000001){
+			if(result > 0){
+				startX = startX + (endX - startX)/2;
+			}else{
+				endX = startX + (endX - startX)/2;
+			}
+			X = (endX - startX)/2 + startX;
+			result = p*exp(-X) + q*sin(X) + r*cos(X) + s*tan(X) + t*X*X + u;
+		}
+		if(result <= 0.0001){
+			printf("%.4f\n", X);
+		}else{
+			printf("No solution\n");
+		}
+	}
+	return 0;
+}
+
+Non UVA - draw circle
+
+ 
+void drawPoint(int x, int y){
+       //draw point goes here
+}
+ 
+void drawCircle(int radius){
+       int y;
+       int x;
+ 
+       y = 0;
+       int rS = radius*radius;
+ 
+       drawPoint(radius, 0);
+       drawPoint(-radius, 0);
+       drawPoint(0, radius);
+       drawPoint(0, -radius);
+ 
+       //first quadrant
+       y = -radius;
+       for(x = 0; x <= radius;){
+              if(rS == ((x+1)*(x+1)) + (y*y)){
+                     drawPoint(x+1, y);
+                     x++;
+              }else if(rS == ((x+1)*(x+1)) + ((y+1)*(y+1))){
+                     drawPoint(x+1, y+1);
+                     x++;
+                     y++;
+              }else{
+                     drawPoint(x, y+1);
+                     y++;
+              }
+       }
+       //second quadrant
+       y = -radius;
+       for(x = 0; x >= -radius; ){
+              if(rS == ((x-1)*(x-1)) + (y*y)){
+                     drawPoint(x-1, y);
+                     x--;
+              }else if(rS == ((x-1)*(x-1)) + ((y-1)*(y-1))){
+                     drawPoint(x-1, y-1);
+                 	x--;
+                     y--;
+              }else{
+                     drawPoint(x, y-1);
+                     y--;
+              }
+       }
+       //third quadrant
+       y = radius;
+       for(x = 0; x >= -radius; ){
+              if(rS == ((x-1)*(x-1)) + (y*y)){
+                     drawPoint(x-1, y);
+                     x--;
+              }else if(rS == ((x-1)*(x-1)) + ((y-1)*(y-1))){
+                     drawPoint(x-1, y-1);
+                     x--;
+                     y--;
+              }else{
+                     drawPoint(x, y-1);
+                     y--;
+              }
+       }
+       //fourth quadrant
+       y = radius;
+       for(x = 0; x <= radius; ){
+              if(rS == ((x+1)*(x+1)) + (y*y)){
+                     drawPoint(x+1, y);
+                     x++;
+              }else if(rS == ((x+1)*(x+1)) + ((y-1)*(y-1))){
+                     drawPoint(x+1, y-1);
+                     x++;
+                     y--;
+              }else{
+                     drawPoint(x, y-1);
+                     y--;
+              }
+       }
+}
+
+111- History Grading
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+int LCS(vector< vector<int> > M, int i, int j){
+	if(i < 0 || j < 0){
+		return 0;
+	}else{
+		return M[i][j];
+	}
+}
+
+int main(){
+	string command;
+
+	cin >> command;
+	int count = atoi(command.c_str());
+
+	vector<int> responseA;
+
+	for(int index = 0; index < count; index++){
+		cin >> command;
+		int value = atoi(command.c_str());
+
+		responseA.push_back(value);
+	}
+
+	vector<int> A(count);
+	for(int index = 0; index < count; index++){
+		A[responseA[index]-1] = index+1;
+	}
+
+	vector<int> responseB;
+
+	while(cin >> command){
+		if(responseB.size() != count-1){
+			responseB.push_back(atoi(command.c_str()));
+		}else{
+			responseB.push_back(atoi(command.c_str()));
+			vector<int> B(count);
+			
+			vector< vector<int> > M(count);
+			for(int index = 0; index < count; index++){
+				A[responseA[index]-1] = index+1;
+				B[responseB[index]-1] = index+1;
+				M[index] = vector<int>(count);
+			}
+
+			for(int i = 0; i < count; i++){
+				for(int j = 0; j < count; j++){
+					if(A[i] == B[j]){
+						M[i][j] = 1 + LCS(M, i-1, j-1);
+					}else{
+						int a = LCS(M, i-1, j);
+						int b = LCS(M, i, j-1);
+						M[i][j] = max(a, b);
+					}
+				}
+			}
+
+			responseB.erase(responseB.begin(), responseB.end());
+
+			int total = M[count-1][count-1];
+			printf("%d\n", total);
+		}
+	}
+
+	return 0;
+}
+
+10131 - Is Bigger Smarter?
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+int main(){
+	string command;
+
+	vector< pair<pair<int,int>, int > > input;
+	int k = 0;
+	while(cin >> command){
+		int weight = atoi(command.c_str());
+		cin >> command;
+		int iq = atoi(command.c_str());
+
+		input.push_back(pair<pair<int, int>, int >(pair<int,int>(weight,iq), k++));
+	}
+
+	sort(input.begin(), input.end());
+
+	//Longest Decreasing subsequency
+	vector<int> lis(input.size());
+	vector<int> prev(input.size());
+	lis[0] = -1;//
+	prev[0] = 0;
+
+	int prevNum = 0;
+	bool changePrev = false;
+	for(int i = 1; i < input.size(); i++){
+		int max = 0;
+		for(int j = 0; j < i; j++){
+			if(input[j].first.second > input[i].first.second){
+				if(lis[j] < max){//
+					max = lis[j];
+					prevNum = j;
+					changePrev = true;
+				}
+			}
+		}
+		lis[i] = max -1;//
+		if(changePrev){
+			prev[i] = prevNum;
+		}else{
+			prev[i] = i;
+		}
+		changePrev = false;
+	}
+
+	int max = 0;
+	int start = 0;
+	for(int i = 0; i < input.size(); i++){
+		if(lis[i] <= max){//
+			max = lis[i];
+			start = i;
+		}
+	}
+
+	vector<int> sequency;
+	while(prev[start] != start){
+		sequency.push_back(input[start].second +1);
+		start = prev[start];
+	}
+	sequency.push_back(input[start].second +1);
+	reverse(sequency.begin(), sequency.end());
+
+	printf("%d\n", sequency.size());
+	for(int index = 0; index < sequency.size(); index++){
+		printf("%d\n", sequency[index]);
+	}
+
+	return 0;
+}
+
+437 - The tower of Babylon
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+int main(){
+	string command;
+	int k = 1;
+
+	while(cin >> command){
+		vector<int> lis;
+		int lines = atoi(command.c_str());
+		if(lines != 0){
+			vector< pair<pair<int, int>, int > > values;
+
+			while(lines--){
+				vector<int> cube;
+				cin >> command;
+				cube.push_back(atoi(command.c_str()));
+				cin >> command;
+				cube.push_back(atoi(command.c_str()));
+				cin >> command;
+				cube.push_back(atoi(command.c_str()));
+
+				values.push_back(pair<pair<int, int>, int >(pair<int, int>(cube[0], cube[1]), cube[2]));
+				values.push_back(pair<pair<int, int>, int >(pair<int, int>(cube[1], cube[0]), cube[2]));
+				values.push_back(pair<pair<int, int>, int >(pair<int, int>(cube[0], cube[2]), cube[1]));
+				values.push_back(pair<pair<int, int>, int >(pair<int, int>(cube[2], cube[0]), cube[1]));
+				values.push_back(pair<pair<int, int>, int >(pair<int, int>(cube[1], cube[2]), cube[0]));
+				values.push_back(pair<pair<int, int>, int >(pair<int, int>(cube[2], cube[1]), cube[0]));
+				
+			}
+
+			sort(values.begin(), values.end());
+			reverse(values.begin(), values.end());
+
+			lis = vector<int>(values.size());
+			lis[0] = values[0].second;
+
+			for(int i = 1; i < values.size(); i++){
+				int max = values[i].second;
+				for(int j = 0; j < i; j++){
+					if(values[j].first.first > values[i].first.first && values[j].first.second > values[i].first.second){
+						if(lis[j] + values[i].second > max){
+							max = lis[j] + values[i].second;
+						}
+					}
+				}
+				lis[i] = max;
+			}
+		}else{
+			return 0;
+		}
+		int maxValue = lis[0];
+		for(int index = 1; index < lis.size(); index++){
+			maxValue = (int)max((int) maxValue, (int)lis[index]);
+		}
+
+		printf("Case %d: maximum height = %d\n", k++, maxValue);
+
+	}
+
+	return 0;
+}
+
+497 - Strategic Defense Initiative - WA due to input reading?
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+int main(){
+	char command[200];
+	cin.getline(command, 200);
+	int cases = atoi(command);
+	cin.getline(command, 200);
+
+	while(cases--){
+		vector<int> numbers;
+		cin.getline(command, 200);
+		while(strcmp(command, "") != 0){
+			numbers.push_back(atoi(command));
+			cin.getline(command, 200);
+		}
+
+		vector<int> lis(numbers.size());
+		vector<int> prev(numbers.size());
+		int max = 0;
+
+		lis[0] = 1;
+		prev[0] = 0;
+		int prevNum = 0;
+		bool changePrev = false;
+		for(int i = 1; i < numbers.size(); i++){
+			max = 0;
+			for(int j = 0; j < i; j++){
+				if(numbers[j] < numbers[i]){
+					if(lis[j] > max){
+						max = lis[j];
+						prevNum = j;
+						changePrev = true;
+					}
+				}
+			}
+			lis[i] = max+1;
+			if(changePrev){
+				prev[i] = prevNum;
+			}else{
+				prev[i] = i;
+			}
+			changePrev = false;
+		}
+
+		printf("Max hits: %d\n", lis[lis.size()-1]);
+		int start = 0;
+		max = 0;
+		vector<int> seq;
+
+		for(int i = 0; i < lis.size(); i++){
+			if(lis[i] > max){
+				max = lis[i];
+				start = i;
+			}
+		}
+
+		while(prev[start] != start){
+			seq.push_back(numbers[start]);
+			start = prev[start];
+		}
+		seq.push_back(lis[start]);
+		reverse(seq.begin(), seq.end());
+
+		for(int i  = 0; i < seq.size(); i++){
+			printf("%d\n", seq[i]);
+		}
+		if(cases != 0){
+			printf("\n");
+		}
+	}
+
+	return 0;
+}
+
+108 - Maximum Sum
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <set>
+
+using namespace std;
+
+int main(){
+	string command;
+	cin >> command;
+	int n = atoi(command.c_str());
+	int count = n;
+
+	vector<vector<int> > matrix(n);
+	vector<vector<int> > sumMatrix(n);
+	int i,j;
+	for(i = 0; i < n; i++){
+		matrix[i] = vector<int>(n);
+		sumMatrix[i] = vector<int>(n);
+	}
+
+	i = 0;
+	j = 0;
+
+	for(i = 0; i < n; i++){
+		for(j = 0; j < n; j++){
+			cin >> command;
+			sumMatrix[i][j] = atoi(command.c_str());
+			if(i > 0){
+				sumMatrix[i][j] += sumMatrix[i-1][j];
+			}
+			if(j > 0){
+				sumMatrix[i][j] += sumMatrix[i][j-1];
+			}
+			if(i > 0 && j > 0){
+				sumMatrix[i][j] -= sumMatrix[i-1][j-1];
+			}
+		}
+	}
+
+	int maxSubRect = -127*100*100;
+	for(i = 0; i < n; i++){
+		for(j = 0; j < n; j++){
+			for(int k = i; k < n; k++){
+				for(int l = j; l < n; l++){
+					int subRect = sumMatrix[k][l];
+					if(i > 0){
+						subRect -= sumMatrix[i-1][l];
+					}
+					if(j > 0){
+						subRect -= sumMatrix[k][j-1];
+					}
+					if(i > 0 && j > 0){
+						subRect += sumMatrix[i-1][j-1];
+					}
+					maxSubRect = max((int)maxSubRect, subRect);
+				}
+			}
+		}
+	}
+
+	printf("%d\n", maxSubRect);
+
+	return 0;
+}
+
+10074 - Take the land
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <set>
+
+using namespace std;
+
+int main(){
+	string command;
+	bool nextMatrix = true;
+
+	while(nextMatrix){
+		cin >> command;
+		int n = atoi(command.c_str());
+		cin >> command;
+		int m = atoi(command.c_str());
+
+		if(n == m && n == 0){
+			nextMatrix = false;
+		}else{
+			vector<vector<int> > sumMatrixZero(n);
+			vector<vector<int> > sumMatrixOne(n);
+			int i,j, value;
+			for(i = 0; i < n; i++){
+				sumMatrixZero[i] = vector<int>(m);
+				sumMatrixOne[i] = vector<int>(m);
+			}
+
+			i = 0;
+			j = 0;
+
+			for(i = 0; i < n; i++){
+				for(j = 0; j < m; j++){
+					cin >> command;
+					value = atoi(command.c_str());
+					if(value == 1){
+						sumMatrixOne[i][j] = 1;
+					}else{
+						sumMatrixZero[i][j] = 1;
+					}
+					if(i > 0){
+						sumMatrixOne[i][j] += sumMatrixOne[i-1][j];
+						sumMatrixZero[i][j] += sumMatrixZero[i-1][j];
+					}
+					if(j > 0){
+						sumMatrixOne[i][j] += sumMatrixOne[i][j-1];
+						sumMatrixZero[i][j] += sumMatrixZero[i][j-1];
+					}
+					if(i > 0 && j > 0){
+						sumMatrixOne[i][j] -= sumMatrixOne[i-1][j-1];
+						sumMatrixZero[i][j] -= sumMatrixZero[i-1][j-1];
+					}
+				}
+			}
+
+			int maxSubRect = -1*n*m;
+			for(i = 0; i < n; i++){
+				for(j = 0; j < m; j++){
+					for(int k = i; k < n; k++){
+						for(int l = j; l < m; l++){
+							int subRectOne = sumMatrixOne[k][l];
+							int subRectZero = sumMatrixZero[k][l];
+							if(i >0){
+								subRectOne -= sumMatrixOne[i-1][l];
+								subRectZero -= sumMatrixZero[i-1][l];
+							}
+							if(j > 0){
+								subRectOne -= sumMatrixOne[k][j-1];
+								subRectZero -= sumMatrixZero[k][j-1];
+							}
+							if(i > 0 && j > 0){
+								subRectOne += sumMatrixOne[i-1][j-1];
+								subRectZero += sumMatrixZero[i-1][j-1];
+							}
+							if(subRectOne == 0){
+								maxSubRect = max((int)maxSubRect, subRectZero);
+							}
+						}
+					}
+				}
+			}
+
+			if(maxSubRect < 0){
+				maxSubRect = 0;
+			}
+			printf("%d\n", maxSubRect);
+		}
+	}
+	return 0;
+}
+
+10684 - The jackpot
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <set>
+#include <limits.h>
+
+using namespace std;
+
+int main(){
+
+	bool readValues = true;
+	int value;
+	long long lastMax;
+
+	while(readValues){
+		int count;
+		scanf("%d", &count);
+		int maxSubArray = 0;
+		int maxPrev = 0;
+		int value;
+
+		if(count == 0){
+			readValues = false;
+			break;
+		}else{
+			while(count--){
+				scanf("%d", &value);
+
+				if(value >= maxPrev+value){
+					maxPrev = value;
+				}else{
+					maxPrev += value;
+				}
+				if(maxPrev > maxSubArray){
+					maxSubArray = maxPrev;
+				}
+			}
+
+			if(maxSubArray <= 0){
+				printf("Losing streak.\n");
+			}else{
+				printf("The maximum winning streak is %d.\n", maxSubArray);
+			}
+		}
+	}
+
+	return 0;
+}
+
+10130 - SuperSale
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+map<pair<int, int>, int> history;
+
+int main(){
+	string command;
+	int cases = 0;
+
+	cin >> command;
+	cases = atoi(command.c_str());
+
+	while(cases--){
+		int objs = 0;
+		vector<int> P;
+		vector<int> W;
+		history.clear();
+
+		cin >> command;
+		objs = atoi(command.c_str());
+
+		while(objs--){
+			cin >> command;
+			P.push_back(atoi(command.c_str()));
+			cin >> command;
+			W.push_back(atoi(command.c_str()));
+		}
+		objs = P.size();
+
+		int people = 0;
+		vector<int> PMW;
+
+		cin >> command;
+		people = atoi(command.c_str());
+
+		int maxPMW = 0;
+		int PMWTemp = 0;
+
+		while(people--){
+			cin >>command;
+			PMWTemp = atoi(command.c_str());
+			maxPMW = max((int)maxPMW, PMWTemp);
+			PMW.push_back(PMWTemp);
+		}
+
+		people = PMW.size();
+
+		history[pair<int,int>(0,0)] = 0;
+		for(int index = 1; index < 31; index++){
+			if(index == W[0]){
+				history[pair<int,int>(0,index)] = P[0];
+			}else{
+				history[pair<int,int>(0,index)] = history[pair<int,int>(0,index-1)];
+			}
+		}
+
+		for(int i = 1; i < P.size(); i++){
+			for(int j = 0; j <= maxPMW; j++){
+				if(j >= W[i]){
+					history[pair<int,int>(i,j)] = max((int)history[pair<int,int>(i-1, j)], (int)history[pair<int,int>(i-1,j-W[i])] + P[i]);
+				}else{
+					history[pair<int,int>(i,j)] = history[pair<int,int>(i-1,j)];
+				}
+			}
+		}
+		
+		int totalP = 0;
+
+		for(int index = 0; index < people; index++){
+			totalP += history[pair<int, int>(P.size()-1, PMW[index])];
+		}
+
+		printf("%d\n", totalP);
+	}
+
+	return 0;
+}
+
+http://en.wikipedia.org/wiki/Knapsack_problem  knapsack problem with DP bottom-up
+
+10181 - 15 puzzle problem - WA, need test inputs and possible change D value
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+
+using namespace std;
+#define R 0
+#define L 1
+#define U 2
+#define D 3
+
+int dj[] = {1, -1, 0, 0};
+int di[] = {0, 0, -1, 1};
+
+vector<vector<int> > moveM(vector<vector<int> > M, vector<int> moves){
+	vector<vector<int> > result(4);
+	int i, j;
+
+	for(int line = 0; line <4; line++){
+		result[line] = vector<int>(4);
+		for(int col = 0; col < 4; col++){
+			result[line][col] = M[line][col];
+			if(M[line][col] == 0){
+				i = line;
+				j = col;
+			}
+		}
+	}
+
+	for(int movesIndex = 0; movesIndex < moves.size(); movesIndex++){
+		if(moves[movesIndex] == R || moves[movesIndex] == L){
+			if(j + dj[moves[movesIndex]] >= 4 || j + dj[moves[movesIndex]] < 0){
+				return vector<vector<int> >();
+			}else{
+				int tempValue = result[i][j+dj[moves[movesIndex]]];
+				result[i][j+dj[moves[movesIndex]]] = 0;
+				result[i][j] = tempValue;
+			}
+			j = j + dj[moves[movesIndex]];
+		}else if(moves[movesIndex] == U || moves[movesIndex] == D){
+			if(i + di[moves[movesIndex]] >= 4 || i + di[moves[movesIndex]] < 0){
+				return vector<vector<int> >();
+			}else{
+				int tempValue = result[i+di[moves[movesIndex]]][j];
+				result[i+di[moves[movesIndex]]][j] = 0;
+				result[i][j] = tempValue;
+			}
+			i = i+di[moves[movesIndex]];
+		}
+	}
+
+	return result;
+}
+
+int hdi[] = {3, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3};
+int hdj[] = {3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+
+int H(vector<vector<int> > M){
+	int h = 0;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			if(M[i][j] != 0){
+				h += (abs((int)(i - hdi[M[i][j]])) + abs((int)(j - hdj[M[i][j]])));
+			}
+		}
+	}
+
+	return 10*h;
+}
+
+char charHash[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p'};
+
+string Hash(vector<vector<int> > M){
+	string value = string("abcdefghijklmnop");
+	int k = 0;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			value[k++] = charHash[M[i][j]];
+		}
+	}
+
+	return value;
+}
+
+int main(){
+	string command;
+	cin >> command;
+	int count = atoi(command.c_str());
+
+	while(count--){
+		priority_queue<pair<int, vector<int> >, vector<pair<int, vector<int> > >, greater<pair<int, vector<int> > > > pq;
+
+		vector<vector<int> > M(4);
+		for(int line = 0; line < 4; line++){
+			M[line] = vector<int>(4);
+			for(int j = 0; j < 4; j++){
+				cin >> command;
+				M[line][j] = atoi(command.c_str());
+				if(M[line][j] == 0){
+				}
+			}
+		}
+
+		pq.push(pair<int, vector<int> >(0, vector<int>()));
+		map<string, bool> hashTable;
+		hashTable[Hash(M)] = true;
+
+		vector<int> subMove = pq.top().second;
+		vector<vector<int> > subM = moveM(M, subMove);
+		while(H(subM) != 0 && subMove.size() < 51){
+			string hashValue;
+			bool isInHash;
+			vector<int> moveNow(1);
+			pq.pop();
+			//R
+			subMove.push_back(R);
+			moveNow[0] = R;
+			vector<vector<int> > result = moveM(subM, moveNow);
+			if(result.size() != 0){
+				hashValue = Hash(result);
+				isInHash = hashTable[Hash(result)];
+				if(isInHash == false){
+					pq.push(pair<int, vector<int> >(subMove.size() + H(result), subMove));
+					hashTable[hashValue] = true;
+				}
+			}
+
+			//L
+			subMove[subMove.size()-1] = L;
+			moveNow[0] = L;
+			result = moveM(subM, moveNow);
+			if(result.size() != 0){
+				hashValue = Hash(result);
+				isInHash = hashTable[Hash(result)];
+				if(isInHash == false){
+					pq.push(pair<int, vector<int> >(subMove.size() + H(result), subMove));
+					hashTable[hashValue] = true;
+				}
+			}
+
+			//U
+			subMove[subMove.size()-1] = U;
+			moveNow[0] = U;
+			result = moveM(subM, moveNow);
+			if(result.size() != 0){
+				hashValue = Hash(result);
+				isInHash = hashTable[Hash(result)];
+				if(isInHash == false){
+					pq.push(pair<int, vector<int> >(subMove.size() + H(result), subMove));
+					hashTable[hashValue] = true;
+				}
+			}
+
+			//D
+			subMove[subMove.size()-1] = D;
+			moveNow[0] = D;
+			result = moveM(subM, moveNow);
+			if(result.size() != 0){
+				hashValue = Hash(result);
+				isInHash = hashTable[Hash(result)];
+				if(isInHash == false){
+					pq.push(pair<int, vector<int> >(subMove.size() + H(result), subMove));
+					hashTable[hashValue] = true;
+				}
+			}
+
+			subMove = pq.top().second;
+			subM = moveM(M, subMove);
+		}
+
+		if(subMove.size() > 50){
+			printf("This puzzle is not solvable.\n");
+		}else{
+			char moveChar[] = {'R', 'L', 'U', 'D'};
+			for(int index = 0; index < subMove.size(); index++){
+				printf("%c", moveChar[subMove[index]]);
+			}
+			printf("\n");
+		}
+	}
+
+	return 0;
+}
+
+11151 - Longest Palindrome
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+using namespace std;
+#define INSERT 0
+#define DELETE 1
+#define REPLACE 2
+int main(){
+ string A;
+ bool first = true;
+ while(cin >> A){
+  string B;
+  cin >> B;
+  string startA("_");
+  string startB("_");
+  A = startA.append(A);
+  B = startB.append(B);
+  vector<vector<int>> scoreM(A.length());
+  vector<vector<pair<int, int> > > from(A.length());
+  int i,j;
+  for(i = 0; i < A.length(); i++){
+   scoreM[i] = vector<int>(B.length());
+   from[i] = vector<pair<int,int> >(B.length());
+   for(j = 0; j < B.length(); j++){
+    if(i == j && i == 0){
+     scoreM[i][j] = 0;
+     from[i][j] = pair<int, int>(0,0);
+    }else if(j == 0){
+     scoreM[i][j] = i * (-1);
+     from[i][j] = pair<int, int>(i-1,j);
+    }else if(i == 0){
+     scoreM[i][j] = j * (-1);
+     from[i][j] = pair<int, int>(i,j-1);
+    }else{
+     int op1 = scoreM[i-1][j-1];
+     if(A[i] == B[j]){
+      op1 += 2;
+     }else{
+      op1 -= 1;
+     }
+     int op2 = scoreM[i-1][j] -1;
+     int op3 = scoreM[i][j-1] -1;
+     if(op1 >= op2 && op1 >= op3){
+      scoreM[i][j] = op1;
+      from[i][j] = pair<int,int>(i-1,j-1);
+     }else if(op2 >= op1 && op2 >= op3){
+      scoreM[i][j] = op2;
+      from[i][j] = pair<int,int>(i-1,j);
+     }else{
+      scoreM[i][j] = op3;
+      from[i][j] = pair<int,int>(i, j-1);
+     }
+    }
+   }
+  }
+  i = A.length()-1;
+  j = B.length()-1;
+  vector<pair<int, pair<int, char> > > seq;
+  while(i != 0 || j != 0){
+   if(from[i][j].first == i-1 && from[i][j].second == j-1){
+    if(A[i] != B[j]){
+     seq.push_back(pair<int, pair<int, char> >(REPLACE, pair<int, char>(i, B[j])));
+    }
+   }else if(from[i][j].first == i-1){
+    seq.push_back(pair<int, pair<int, char> >(DELETE, pair<int, char>(i == 0 ? 1 : i, ' ')));
+   }else{
+    seq.push_back(pair<int, pair<int, char> >(INSERT, pair<int, char>(i+1, B[j])));
+   }
+   int newi = from[i][j].first;
+   int newj = from[i][j].second;
+   i = newi;
+   j = newj;
+  }
+  vector<pair<int,pair<int, char> >>::iterator it = seq.begin();
+  int count = seq.size();
+  if(first){
+   first = false;
+  }else{
+   printf("\n");
+  }
+  printf("%d\n", count);
+  int k = 1;
+  while(count--){
+   if(it->first == REPLACE){
+    printf("%d Replace %d,%c\n", k++, it->second.first, it->second.second);
+   }else if(it->first == INSERT){
+    printf("%d Insert %d,%c\n", k++, it->second.first, it->second.second);
+   }else{
+    printf("%d Delete %d\n", k++, it->second.first);
+   }
+   if(count != 0){
+    it++;
+   }
+  }
+ }
+ return 0;
+}
+
+526 - String Distance and Transform Process - WA, wrong transform ?
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+using namespace std;
+#define INSERT 0
+#define DELETE 1
+#define REPLACE 2
+int main(){
+ string A;
+ bool first = true;
+ while(cin >> A){ // change to cin.readline (consider space)
+  string B;
+  cin >> B;
+  string startA("_");
+  string startB("_");
+  A = startA.append(A);
+  B = startB.append(B);
+  vector<vector<int>> scoreM(A.length());
+  vector<vector<pair<int, int> > > from(A.length());
+  int i,j;
+  for(i = 0; i < A.length(); i++){
+   scoreM[i] = vector<int>(B.length());
+   from[i] = vector<pair<int,int> >(B.length());
+   for(j = 0; j < B.length(); j++){
+    if(i == j && i == 0){
+     scoreM[i][j] = 0;
+     from[i][j] = pair<int, int>(0,0);
+    }else if(j == 0){
+     scoreM[i][j] = i * (-1);
+     from[i][j] = pair<int, int>(i-1,j);
+    }else if(i == 0){
+     scoreM[i][j] = j * (-1);
+     from[i][j] = pair<int, int>(i,j-1);
+    }else{
+     int op1 = scoreM[i-1][j-1];
+     if(A[i] == B[j]){
+      op1 += 2;
+     }else{
+      op1 -= 1;
+     }
+     int op2 = scoreM[i-1][j] -1;
+     int op3 = scoreM[i][j-1] -1;
+     if(op1 >= op2 && op1 >= op3){
+      scoreM[i][j] = op1;
+      from[i][j] = pair<int,int>(i-1,j-1);
+     }else if(op2 >= op1 && op2 >= op3){
+      scoreM[i][j] = op2;
+      from[i][j] = pair<int,int>(i-1,j);
+     }else{
+      scoreM[i][j] = op3;
+      from[i][j] = pair<int,int>(i, j-1);
+     }
+    }
+   }
+  }
+  i = A.length()-1;
+  j = B.length()-1;
+  vector<pair<int, pair<int, char> > > seq;
+  while(i != 0 || j != 0){
+   if(from[i][j].first == i-1 && from[i][j].second == j-1){
+    if(A[i] != B[j]){
+     seq.push_back(pair<int, pair<int, char> >(REPLACE, pair<int, char>(i, B[j])));
+    }
+   }else if(from[i][j].first == i-1){
+    seq.push_back(pair<int, pair<int, char> >(DELETE, pair<int, char>(i == 0 ? 1 : i, ' ')));
+   }else{
+    seq.push_back(pair<int, pair<int, char> >(INSERT, pair<int, char>(i+1, B[j])));
+   }
+   int newi = from[i][j].first;
+   int newj = from[i][j].second;
+   i = newi;
+   j = newj;
+  }
+  vector<pair<int,pair<int, char> >>::iterator it = seq.begin();
+  int count = seq.size();
+  if(first){
+   first = false;
+  }else{
+   printf("\n");
+  }
+  printf("%d\n", count);
+  int k = 1;
+  while(count--){
+   if(it->first == REPLACE){
+    printf("%d Replace %d,%c\n", k++, it->second.first, it->second.second);
+   }else if(it->first == INSERT){
+    printf("%d Insert %d,%c\n", k++, it->second.first, it->second.second);
+   }else{
+    printf("%d Delete %d\n", k++, it->second.first);
+   }
+   if(count != 0){
+    it++;
+   }
+  }
+ }
+ return 0;
+}
+10801- Lift Hopping
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+#include <climits>
+
+using namespace std;
+
+int main(){
+	string inputValue;
+	char inputChars[1001];
+
+	while(cin.getline(inputChars,1000)){
+		int k = 0;
+
+		inputValue = string(inputChars);
+		int spacePos = inputValue.find(' ');
+
+		int elevatorCount = atoi(inputValue.substr(0, spacePos).c_str());
+		vector<unsigned long long> price(elevatorCount);
+		vector<vector<unsigned long long> > M(elevatorCount*100);
+		int i;
+		int j;
+		for(i = 0; i < elevatorCount*100; i++){
+			M[i] = vector<unsigned long long>(elevatorCount*100);
+			for(j = 0; j < elevatorCount*100; j++){
+				M[i][j] = ULLONG_MAX;
+		vector<unsigned long long> dist(elevatorCount*100, ULLONG_MAX);
+		dist[0] = 0;
+		priority_queue<pair<unsigned long long,unsigned long long>, vector<pair<unsigned long long, unsigned long long> > , greater<pair<unsigned long long, unsigned long long> > > pq;
+		pq.push(pair<unsigned long long,unsigned long long>(0, 0));
+
+		while(!pq.empty()){
+			pair<unsigned long long,unsigned long long> front = pq.top();
+			pq.pop();
+
+			int d = front.first, u = front.second;
+			if(d == dist[u]){
+				for(j = 0; j < elevatorCount*100; j++){
+					if(dist[u] + M[u][j] < dist[j] && u != j && M[u][j] != ULLONG_MAX){
+						dist[j] = dist[u] + M[u][j];
+						pq.push(pair<unsigned long long,unsigned long long>(dist[j], j));
+					}
+				}
+			}
+		}
+
+		int totalDistance = ULLONG_MAX;
+		i = endFloor;
+		k = 0;
+		while(k < elevatorCount){
+			totalDistance = dist[endFloor + (k*100)] < totalDistance ? dist[endFloor + (k*100)] : totalDistance;
+			k++;
+		}
+
+		if(totalDistance == ULLONG_MAX){
+
+			printf("IMPOSSIBLE\n");
+		}else{
+			printf("%d\n", totalDistance);
+		}
+	}
+
+	return 0;
+}
+
+
+
+10034 - WA
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+using namespace std;
+void initSet(vector<int> *set){
+ for(int i = 0; i < set->size(); i++){
+  (*set)[i] = i;
+ }
+}
+bool isSameSet(vector<int> set, int a, int b){
+ int set1 = a;
+ int set2 = b;
+ while(set[set1] != set1){
+  set1 = set[set1];
+ }
+ while(set[set2] != set2){
+  set2 = set[set2];
+ }
+ if(set1 == set2){
+  return true;
+ }else{
+  return false;
+ }
+}
+void unionSet(vector<int> *set, int a, int b){
+ int set1 = a;
+ int set2 = b;
+ 
+ while((*set)[set1] != set1){
+  set1 = (*set)[set1];
+ }
+ while((*set)[set2] != set2){
+  set2 = (*set)[set2];
+ }
+ (*set)[set2] = set1;
+}
+int main(){
+ string inputValue;
+ int k;
+ cin >> inputValue;
+ int cases = atoi(inputValue.c_str());
+ for(k = 0; k < cases; k++){
+  int p, t;
+  cin >> inputValue;
+  int points = atoi(inputValue.c_str());
+  vector<pair<double,double> > pointsList;
+  vector<pair<float, pair<int, int> > > EdgeList;
+  for(p = 0; p < points; p++){
+   cin >> inputValue;
+   double x = atof(inputValue.c_str());
+   cin >> inputValue;
+   double y = atof(inputValue.c_str());
+   pointsList.push_back(pair<double,double>(x,y));
+  }
+  for(p = 0; p < points-1; p++){
+   for(t = p+1; t < points; t++){
+     EdgeList.push_back(pair<float, pair<int,int> >(
+      sqrt(pow(pointsList[p].first - pointsList[t].first, 2) + pow(pointsList[p].second - pointsList[t].second, 2)),
+      pair<int, int>(p,t)
+      )
+     );
+   }
+  }
+  sort(EdgeList.begin(), EdgeList.end());
+  double mst_cost = 0;
+  vector<int> set(points);
+  initSet(&set);
+  int i;
+  for(i = 0; i < EdgeList.size(); i++){
+   pair<double, pair<int, int> > front = EdgeList[i];
+   if(!isSameSet(set, front.second.first, front.second.second)){
+    mst_cost += front.first;
+    unionSet(&set, front.second.first, front.second.second);
+   }
+  }
+  printf("%.2f\n", mst_cost);
+ }
+ return 0;
+}
+
+11367 - WA
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+using namespace std;
+int main(){
+ string inputValue;
+ int i, j, k;
+ while(cin >> inputValue){
+  vector<int> price;
+  vector<vector<int> > M;
+  int n = atoi(inputValue.c_str());
+  M = vector<vector<int> >(n, vector<int>(n, 0));
+  cin >> inputValue;
+  int m = atoi(inputValue.c_str());
+  // for each city
+  for(k = 0; k < n; k++){
+   cin >> inputValue;
+   price.push_back(atoi(inputValue.c_str()));
+  }
+  for(k = 0; k < m; k++){
+   cin >> inputValue;
+   int u = atoi(inputValue.c_str());
+   cin >> inputValue;
+   int v = atoi(inputValue.c_str());
+   cin >> inputValue;
+   int d = atoi(inputValue.c_str());
+   M[u][v] = d;
+   M[v][u] = d;
+  }
+  cin >> inputValue;
+  int queries = atoi(inputValue.c_str());
+  for(k = 0; k < queries; k++){
+   cin >> inputValue;
+   int capacity = atoi(inputValue.c_str());
+   cin >> inputValue;
+   int start = atoi(inputValue.c_str());
+   cin >> inputValue;
+   int end = atoi(inputValue.c_str());
+   map<pair<int,int>,bool> distBool;
+   map<pair<int,int>, int> dist;
+   dist[pair<int,int>(0,0)] = 0;
+   distBool[pair<int,int>(0,0)] = true;
+   priority_queue<pair<int, pair<int, int> >, vector<pair<int, pair<int, int> > >, greater<pair<int, pair<int, int> > > > pq;
+   pq.push(pair<int, pair<int, int> >(0, pair<int, int>(start, 0)));
+   int d, u, t;
+   bool found = false;
+   while(pq.empty() == false){
+    pair<int, pair<int, int> > front = pq.top();
+    pq.pop();
+    d = front.first;
+    u = front.second.first;
+    t = front.second.second;
+    if(u == end){
+     found = true;
+     break;
+    }
+    if(distBool[pair<int,int>(u,t)] == true){
+     if(t < capacity){
+      pq.push(pair<int, pair<int, int> >(price[u] + d, pair<int,int>(u, t+1)));
+      dist[pair<int,int>(u,t+1)] = price[u] + d;
+      distBool[pair<int,int>(u,t+1)] = true;
+     }
+     for(j = 0; j < n; j++){
+      if(M[u][j] > 0 && t >= M[u][j] && (distBool[pair<int,int>(j,t - M[u][j])] == false || d < dist[pair<int,int>(j,t - M[u][j])]) ){
+       pq.push(pair<int, pair<int, int> >(d, pair<int,int>(j, t - M[u][j])));
+       dist[pair<int,int>(j,t - M[u][j])] = d;
+       distBool[pair<int,int>(j,t - M[u][j])] = true;
+      }
+     }
+    }
+   }
+   if(found == false){
+    printf("Impossible\n");
+   }else{
+    printf("%d\n", d);
+   }
+  }
+ }
+ return 0;
+}
+
+10608 - Friends
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+#include <climits>
+#include <set>
+
+using namespace std;
+
+int main(){
+	string inputValue;
+
+	cin >> inputValue;
+	int k = atoi(inputValue.c_str());
+
+	while(k--){
+		cin >> inputValue;
+		int N = atoi(inputValue.c_str());
+		cin >> inputValue;
+		int M = atoi(inputValue.c_str());
+
+		vector<int> people(N+1);
+		int index;
+		for(index = 0; index <N+1; index++){
+			people[index] = index;
+		}
+
+		while(M--){
+			cin >> inputValue;
+			int A = atoi(inputValue.c_str());
+			cin >> inputValue;
+			int B = atoi(inputValue.c_str());
+
+			int Aparent = A;
+			while(people[Aparent] != Aparent){
+				Aparent = people[Aparent];
+			}
+
+			int Bparent = B;
+			while(people[Bparent] != Bparent){
+				Bparent = people[Bparent];
+			}
+
+			people[A] = people[B];
+		}
+
+		int maxJump = 0;
+		vector<bool> jumped(N+1, false);
+		vector<int> jumps(N+1,0);
+		for(index = 0; index != N+1; index++){
+			if(jumped[index] == false){
+				int node = index;
+				int jump = 0;
+				while(people[node] != node){
+					jump++;
+					jumped[node] = true;
+					node = people[node];
+				}
+				jump = jump != 0 ? jump+1 : 0;
+				jumps[node] += jump;
+			}
+		}
+		for(index = 0; index != N+1; index++)
+		{
+			maxJump = (int)max((int)jumps[index], (int)maxJump);
+		}
+
+		printf("%d\n", maxJump);
+	}
+
+	return 0;
+}
+
+231 - Testing the Catcher - WA
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+
+using namespace std;
+
+int main(){
+	string inputValue;
+
+	bool testCase = true;
+
+	vector<int> A;
+	vector<int> X;
+	int k = 1;
+
+	while(testCase){
+		cin >> inputValue;
+		int inputInt = atoi(inputValue.c_str());
+		if(inputInt == -1){
+
+			for(int index = X.size()-1; index >= 0; index--){
+				vector<int>::iterator it = upper_bound(A.begin(), A.end(), X[index]);
+				if(A.size() == 0 || it - A.begin() == A.size()){
+					A.push_back(X[index]);
+				}else{
+					A[it - A.begin()] = X[index];
+				}
+			}
+
+			//process output
+			printf("Test #%d:\n  maximum possible interceptions: %d\n\n", k, A.size());
+			A.clear();
+			X.clear();
+			k++;
+
+			cin >> inputValue;
+			inputInt = atoi(inputValue.c_str());
+			if(inputInt == -1){
+				testCase = false;
+				continue;
+			}
+		}
+
+		X.push_back(inputInt);
+	}
+
+	return 0;
+}
+
+10305 - Ordering Tasks
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+
+using namespace std;
+
+int main(){
+	string inputValue;
+
+	cin >> inputValue;
+	int N = atoi(inputValue.c_str());
+
+	cin >> inputValue;
+	int M = atoi(inputValue.c_str());
+
+	while(N != 0 || M != 0){
+		vector<vector<bool> > matrix(N+1, vector<bool>(N+1, false));
+
+		while(M--){
+			cin >> inputValue;
+			int A = atoi(inputValue.c_str());
+			cin >> inputValue;
+			int B = atoi(inputValue.c_str());
+
+			matrix[A][B] = true;
+		}
+
+		vector<int> L;
+		vector<int> S;
+
+		int i;
+		int j;
+		bool hasLink = false;
+		for(i = 1; i < N+1; i++){
+			hasLink = false;
+			for(j = 1; j < N+1; j++){
+				if(matrix[j][i] == true){
+					hasLink = true;
+					break;
+				}
+			}
+			if(hasLink == false){
+				S.push_back(i);
+			}
+		}
+
+		while(S.size() != 0){
+			int node = S[0];
+			S.erase(S.begin());
+			L.push_back(node);
+
+			for(i = 1; i < N+1; i++){
+				if(matrix[node][i] == true){
+					matrix[node][i] = false;
+					hasLink = false;
+					for(j = 1; j < N+1; j++){
+						if(matrix[j][i] == true){
+							hasLink = true;
+							break;
+						}
+					}
+					if(hasLink == false){
+						S.push_back(i);
+					}
+				}
+			}
+		}
+
+		for(i = 0; i < L.size(); i++){
+			printf("%d ", L[i]);
+		}
+		printf("\n");
+
+		cin >> inputValue;
+		N = atoi(inputValue.c_str());
+		cin >> inputValue;
+		M = atoi(inputValue.c_str());
+	}
+
+	return 0;
+}
+
+10192 - Vacation - TLE possible cin >> A, use gets instead (https://github.com/mahmudahsan/203-ACM-Problems-Code/blob/master/10192.cpp)
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+
+using namespace std;
+
+int main(){
+	string A;
+	string B;
+
+	bool compare = true;
+	int k = 1;
+	int  M[105][105];
+
+	while(compare){
+		cin >> A;
+		if(A.compare("#") == 0){
+			compare = false;
+			continue;
+		}else{
+			cin >> B;
+
+			int i, j;
+			for(i = 0; i <= A.size(); i++){
+				M[i][0] = 0;
+			}
+			for(j = 0; j <= B.size(); j++){
+				M[0][j] = 0;
+			}
+
+			for(i = 1; i <= A.size(); i++){
+				for(j = 1; j <= B.size(); j++){
+					if(A[i-1] == B[j-1]){
+						M[i][j] = M[i-1][j-1] + 1;
+					}else{
+						M[i][j] = M[i-1][j] > M[i][j-1] ? M[i-1][j] : M[i][j-1];
+					}
+				}
+			}
+
+			printf("Case #%d: you can visit at most %d cities.\n", k++, M[A.size()][B.size()]);
+		}
+	}
+
+	return 0;
+}
+
+11805 - Bafana Bafana
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+using namespace std;
+int main(){
+	string inputString;
+	cin >> inputString;
+	int T = atoi(inputString.c_str());
+	int caseNum = 1;
+	while(T--){
+		cin >> inputString;
+		int N = atoi(inputString.c_str());
+		cin >> inputString;
+		int K = atoi(inputString.c_str());
+		cin >> inputString;
+		int P = atoi(inputString.c_str());
+		int output = (K + P) % N;
+		if(output == 0){
+			output = N;
+		}
+		printf("Case %d: %d\n", caseNum++, output);
+	}
+	return 0;
+}
+
+10161 - Ant on a chess board
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+using namespace std;
+int main(){
+	string inputString;
+	cin >> inputString;
+	int N = atoi(inputString.c_str());
+	while(N != 0){
+		int K = (int)ceil(sqrt((int)N));
+		int prev = (K - 1)*(K -1);
+		int start = prev+1;
+		int size = 2*K -1;
+		
+		int X = 0;
+		int Y = 0;
+		int loc = N - start;
+		if (K % 2 == 0){
+			//par
+			if(loc < K){
+				X = loc+1;
+			}else{
+				X = K;
+			}
+			if(loc >= K){
+				Y = 2*K - loc -1;
+			}else{
+				Y = K;
+			}
+		}else{
+			//impar
+			if(loc >= K){
+				X = 2*K -loc -1;
+			}else{
+				X = K;
+			}
+			if(loc >= K-1){
+				Y = K;
+			}else{
+				Y = loc + 1;
+			}
+		}
+		printf("%d %d\n", X, Y);
+		cin >> inputString;
+		N = atoi(inputString.c_str());
+	}
+	return 0;
+}
+
+315 - Network
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+using namespace std;
+int dfsNumberCounter = 0;
+vector<int> dfs_num;
+vector<int> dfs_low;
+vector<int> dfs_parent;
+int dfsRoot = 0;
+int rootChildren = 0;
+vector<bool> articulation_vertex;
+void articulationPoint(int u, vector<vector<int> > M){
+	int nodes = M.size();
+	dfs_low[u] = dfs_num[u] = dfsNumberCounter++;
+	int index = 0;
+	for(index = 0; index < nodes; index++){
+		if(M[u][index] == 1){
+			if(dfs_num[index] == -1){
+				dfs_parent[index] = u;
+				if(u == dfsRoot){
+					rootChildren++;
+				}
+				articulationPoint(index, M);
+				if(dfs_low[index] >= dfs_num[u]){
+					articulation_vertex[u] = true;
+				}
+				dfs_low[u] = (int)min((int)dfs_low[u], (int)dfs_low[index]);
+			}else if(index != dfs_parent[u]){
+				dfs_low[u] = (int)min((int)dfs_low[u], (int)dfs_num[index]);
+			}
+		}
+	}
+}
+int main(){
+string command;
+	getline(cin, command);
+	int nodes = atoi(command.c_str());
+while(nodes){
+		vector<vector<int> > M(nodes+1, vector<int>(nodes+1, 0));
+		
+		bool zeroSize = false;
+		while(zeroSize == false){
+			getline(cin, command);
+			int start = 0;
+			int end = 0;
+			int A = 0;
+			int B = 0;
+			string substring;
+			while(end != -1){
+				end = command.find(' ', start);
+				substring = command.substr(start, end - start);
+				if(start == 0){
+					A = atoi(substring.c_str());
+					if(A == 0){
+						zeroSize = true;
+						break;
+					}
+				}else{
+					B = atoi(substring.c_str());
+					M[A][B] = 1;
+					M[B][A] = 1;
+				}
+				start = end+1;
+			}
+		}
+		// Find articulation points
+		dfsNumberCounter = 0;
+		dfs_num.assign(nodes+1, -1);
+		dfs_low.assign(nodes+1, 0);
+		dfs_parent.assign(nodes+1, 0);
+		articulation_vertex.assign(nodes+1, false);
+		
+		int index;
+		for(index = 0; index < nodes+1; index++){
+			if(dfs_num[index] == -1){
+				dfsRoot = index;
+				rootChildren = 0;
+				articulationPoint(index, M);
+				articulation_vertex[dfsRoot] = (rootChildren > 1);
+			}
+		}
+		int articulations = 0;
+		for(index = 0; index < nodes+1; index++){
+			if(articulation_vertex[index] == true){
+				articulations++;
+			}
+		}
+		printf("%d\n", articulations);
+		// Read line
+		getline(cin,command);
+		nodes = atoi(command.c_str());
+}
+return 0;
+}
+
+11512 - GATTACA
+
+#include <stdio.h>
+#include <cstring>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <stack>
+#include <map>
+#include <cmath>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+struct Node{
+	map<char, struct Node*> *children;
+};
+
+int main(){
+	string command;
+
+	cin >> command;
+	int cases = atoi(command.c_str());
+	while(cases--){
+		cin >> command;
+		command.append("Z");
+
+		struct Node head;
+		head.children = new map<char, struct Node*>();
+
+		for(int index = 0; index < command.size(); index++){
+			struct Node* pt = &head;
+
+			for(int j = index; j < command.size(); j++){
+				if(pt->children->find(command[j]) != pt->children->end()){
+					pt = pt->children->at(command[j]);
+				}else{
+					struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+					pt->children->insert(pair<char, struct Node*>(command[j], newNode));
+					newNode->children = new map<char, struct Node*>();
+					pt = pt->children->at(command[j]);
+				}
+			}
+		}
+
+		priority_queue<pair<int, string>> pq;
+		stack<pair<string, struct Node*>> st;
+		st.push(pair<string, struct Node*>("", &head));
+		
+		while(st.size() != 0){
+			pair<string, struct Node*> top = st.top();
+			st.pop();
+			pq.push(pair<int, string>(top.second->children->size(), top.first));
+
+			map<char, struct Node*>::iterator it = top.second->children->begin();
+			while(it != top.second->children->end()){
+				char *charValue = (char*)malloc(sizeof(char)*2);
+				charValue[0] = it->first;
+				charValue[1] = 0;
+				string newStr = string(top.first).append(charValue);
+				st.push(pair<string, struct Node*>(newStr, it->second));
+				it++;
+			}
+		}
+
+		int count = 0;
+		string value = "";
+		bool isLooking = true;
+
+		while(isLooking && pq.size() != 0){
+			pair<int, string> top = pq.top();
+			pq.pop();
+
+			if(top.first > count || value == ""){
+				count = top.first;
+				value = top.second;
+			}else if(top.first >= 2 && top.second.size() > value.size()){
+				count = top.first;
+				value = top.second;
+			}else if(top.first == count && top.second.compare(value) < 0){
+				count = top.first;
+				value = top.second;
+			}else if(top.first == 1){
+				isLooking = false;
+			}
+		}
+
+		if(count < 2){
+			printf("No repetitions found!\n");
+		}else{
+			printf("%s %d\n", value.c_str(), count);
+		}
+
+	}
+}
+
+11172 - Relational Operator
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main(){
+	string command;
+	cin >> command;
+
+	int cases = atoi(command.c_str());
+
+	while(cases--){
+		cin >> command;
+		unsigned int A = 0;
+		unsigned int B = 0;
+
+		A = atoi(command.c_str());
+		cin >> command;
+		B = atoi(command.c_str());
+
+		if(A == B){
+			cout << "=" << endl;
+		}else if( A < B){
+			cout << "<" << endl;
+		}else{
+			cout << ">"  << endl;
+		}
+	}
+}
+
+11498 - Division of Nlogonia
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main(){
+	string command;
+	cin >> command;
+
+	int cases = atoi(command.c_str());
+
+	while(cases != 0){
+		int N, M;
+
+		cin >> command;
+		N = atoi(command.c_str());
+		cin >> command;
+		M = atoi(command.c_str());
+
+		while(cases--){
+			int X, Y;
+		
+			cin >> command;
+			X = atoi(command.c_str());
+			cin >> command;
+			Y = atoi(command.c_str());
+
+			if(X == N || Y == M){
+				cout << "divisa" << endl;
+			}else if(X < N && Y > M){
+				cout << "NO" << endl;
+			}else if(X > N && Y > M){
+				cout << "NE" << endl;
+			}else if(X < N && Y < M){
+				cout << "SO" << endl;
+			}else{
+				cout << "SE" << endl;
+			}
+		}
+		cin >> command;
+		cases = atoi(command.c_str());
+	}
+}
+11727 - Cost Cutting
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main(){
+	string command;
+	cin >> command;
+
+	int cases = atoi(command.c_str());
+	int k = 1;
+	while(cases--){
+		int a,b,c;
+
+		cin >> command;
+		a = atoi(command.c_str());
+
+		cin >> command;
+		b = atoi(command.c_str());
+
+		cin >> command;
+		c = atoi(command.c_str());
+
+		vector<int> list;
+		list.push_back(a);
+		list.push_back(b);
+		list.push_back(c);
+
+		sort(list.begin(), list.end());
+
+		printf("Case %d: %d\n", k++, list.at(1));
+	}
+}
+11799 - Horror Dash
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+using namespace std;
+
+int main(){
+	string command;
+	cin >> command;
+
+	int cases = atoi(command.c_str());
+	int k = 1;
+	while(cases--){
+		cin >> command;
+		int runners = atoi(command.c_str());
+		int top = INT_MIN;
+		while(runners--){
+			cin >> command;
+			int value = atoi(command.c_str());
+			if(value > top){
+				top = value;
+			}
+		}
+		printf("Case %d: %d\n", k++, top);
+	}
+}
+
+10107 - What is the Median?
+#include <stdio.h>
+#include <functional>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+#include <limits.h>
+#include <map>
+using namespace std;
+
+int main(){
+	int n = 0;
+	int p = 0;
+
+	string input;
+	vector<long int> list;
+
+	while(cin >> input){
+		long int value = atol(input.c_str());
+
+		if(list.size() == 0){
+			list.push_back(value);
+		}else{
+			vector<long int>::iterator it = lower_bound(list.begin(), list.end(), value);
+			list.insert(it, value);
+		}
+
+		long int mid = 0;
+		int pos = list.size()/2;
+		// there is a middle
+		if(list.size() % 2 == 1){
+			mid = list[pos];
+		}else{// floor of average
+			mid = (list[pos] + list[pos-1])/2;
+		}
+
+		printf("%ld\n", mid);
+	}
+}
+
+
